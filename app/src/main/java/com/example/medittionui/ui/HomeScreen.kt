@@ -1,17 +1,24 @@
     package com.example.medittionui.ui
 
+    import android.content.pm.FeatureInfo
     import androidx.compose.foundation.background
     import androidx.compose.foundation.clickable
     import androidx.compose.foundation.gestures.snapping.SnapPosition
     import androidx.compose.foundation.layout.Arrangement
     import androidx.compose.foundation.layout.Box
+    import androidx.compose.foundation.layout.BoxWithConstraints
     import androidx.compose.foundation.layout.Column
+    import androidx.compose.foundation.layout.PaddingValues
     import androidx.compose.foundation.layout.Row
+    import androidx.compose.foundation.layout.aspectRatio
+    import androidx.compose.foundation.layout.fillMaxHeight
     import androidx.compose.foundation.layout.fillMaxSize
     import androidx.compose.foundation.layout.fillMaxWidth
     import androidx.compose.foundation.layout.padding
     import androidx.compose.foundation.layout.size
     import androidx.compose.foundation.lazy.LazyRow
+    import androidx.compose.foundation.lazy.grid.GridCells
+    import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
     import androidx.compose.foundation.shape.CircleShape
     import androidx.compose.foundation.shape.RoundedCornerShape
     import androidx.compose.material3.Icon
@@ -21,25 +28,30 @@
     import androidx.compose.runtime.mutableStateOf
     import androidx.compose.runtime.remember
 
-    //따로 추가
+    //따로 추가 ->
     import androidx.compose.runtime.setValue
     import androidx.compose.runtime.getValue
 
     import androidx.compose.ui.Alignment
     import androidx.compose.ui.Modifier
     import androidx.compose.ui.draw.clip
+    import androidx.compose.ui.geometry.Offset
     import androidx.compose.ui.graphics.Color
     import androidx.compose.ui.graphics.Outline
+    import androidx.compose.ui.graphics.Path
     import androidx.compose.ui.graphics.painter.Painter
     import androidx.compose.ui.res.painterResource
     import androidx.compose.ui.text.style.LineHeightStyle
     import androidx.compose.ui.unit.dp
+    import com.example.medittionui.Feature
     import com.example.medittionui.R
+    import com.example.medittionui.standardQuadFromTo
     import com.example.medittionui.ui.theme.ButtonBlue
     import com.example.medittionui.ui.theme.DarkerButtonBlue
     import com.example.medittionui.ui.theme.DeepBlue
     import com.example.medittionui.ui.theme.LightRed
     import com.example.medittionui.ui.theme.TextWhite
+    import kotlin.io.path.Path
 
     //전체 화면 박스
     @Composable
@@ -160,5 +172,67 @@
                     tint = Color.White,
                     modifier = Modifier.size(16.dp))
             }
+        }
+    }
+
+    //컬러가 많이 필요하다! ->Feature DataClass 따로 만듦
+    @Composable
+    fun FeatureSection(features: List<Feature>) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = "Features",
+                style = MaterialTheme.typography.headlineLarge,
+                modifier = Modifier.padding(15.dp)
+            )
+            LazyVerticalGrid( //세로 스크롤 + 격자
+                columns = GridCells.Fixed(2), //cells는 deprecated됨
+                contentPadding = PaddingValues(
+                    start = 7.5.dp,
+                    end = 7.5.dp,
+                    bottom = 100.dp
+                ),
+                modifier = Modifier.fillMaxHeight()
+            ) {
+                items(features.size) {
+
+                }
+
+            }
+        }
+    }
+
+    @Composable
+    fun FeatureItem(
+        feature: Feature
+    ) {
+        //부모로부터 받은 레이아웃 제약(constraints)을 안에서 볼 수 있는 박스
+        BoxWithConstraints(
+            modifier = Modifier
+                .padding(7.5.dp)
+                .aspectRatio(1f) //가로 : 세로 비율을 강제로 고정하는 Modifier. 폭이 어떻든 height에 같은 비율을 부여한다. -> 정사각형
+                .clip(RoundedCornerShape(10.dp))
+                .background(feature.darkColor)
+        ) {
+            //FeatureItem이 실제로 차지하게 된 “최대 가로/세로 크기(px)”를 꺼내는 코드
+            val width = constraints.maxWidth
+            val height = constraints.maxHeight
+
+            //Medium colored path
+            val mediumColorPoint1 = Offset(0f, height*0.3f)
+            val mediumColorPoint2 = Offset(width*0.1f, height*0.35f)
+            val mediumColorPoint3 = Offset(width*0.4f, height*0.05f)
+            val mediumColorPoint4 = Offset(width*0.75f, height*0.7f)
+            val mediumColorPoint5 = Offset(width*1.4f, -height.toFloat())
+
+            val mediumColoredPath = Path().apply {
+                moveTo(mediumColorPoint1.x, mediumColorPoint1.y)
+
+                //직접 quadraticBezierTo를 해버리면 코드 길이가 너무 늘어난다. 따로 PathUtil로 분리하여 메서드 정의
+                standardQuadFromTo(mediumColorPoint1, mediumColorPoint2)
+                standardQuadFromTo(mediumColorPoint2, mediumColorPoint3)
+                standardQuadFromTo(mediumColorPoint3, mediumColorPoint4)
+                standardQuadFromTo(mediumColorPoint4, mediumColorPoint5)
+            }
+
         }
     }
