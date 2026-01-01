@@ -22,18 +22,21 @@ val gothicA1 = FontFamily(
 
 // Set of Material typography styles to start with -> 글자 스타일을 정의
 val Typography = Typography(
+    //body1
     bodyMedium = TextStyle(
         color = AquaBlue,
         fontFamily = gothicA1,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp
     ),
+    //h1
     headlineLarge = TextStyle(
         color = TextWhite,
         fontFamily = gothicA1,
         fontWeight = FontWeight.Bold,
         fontSize = 22.sp
     ),
+    //h2
     headlineMedium = TextStyle(
         color = TextWhite,
         fontFamily = gothicA1,
