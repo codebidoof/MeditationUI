@@ -1,6 +1,7 @@
     package com.example.medittionui.ui
 
     import android.content.pm.FeatureInfo
+    import androidx.compose.foundation.Canvas
     import androidx.compose.foundation.background
     import androidx.compose.foundation.clickable
     import androidx.compose.foundation.gestures.snapping.SnapPosition
@@ -41,15 +42,29 @@
     import androidx.compose.ui.graphics.Path
     import androidx.compose.ui.graphics.painter.Painter
     import androidx.compose.ui.res.painterResource
+    import androidx.compose.ui.text.font.FontWeight
     import androidx.compose.ui.text.style.LineHeightStyle
     import androidx.compose.ui.unit.dp
+    import androidx.compose.ui.unit.sp
     import com.example.medittionui.Feature
     import com.example.medittionui.R
     import com.example.medittionui.standardQuadFromTo
+    import com.example.medittionui.ui.theme.Beige1
+    import com.example.medittionui.ui.theme.Beige2
+    import com.example.medittionui.ui.theme.Beige3
+    import com.example.medittionui.ui.theme.BlueViolet1
+    import com.example.medittionui.ui.theme.BlueViolet2
+    import com.example.medittionui.ui.theme.BlueViolet3
     import com.example.medittionui.ui.theme.ButtonBlue
     import com.example.medittionui.ui.theme.DarkerButtonBlue
     import com.example.medittionui.ui.theme.DeepBlue
+    import com.example.medittionui.ui.theme.LightGreen1
+    import com.example.medittionui.ui.theme.LightGreen2
+    import com.example.medittionui.ui.theme.LightGreen3
     import com.example.medittionui.ui.theme.LightRed
+    import com.example.medittionui.ui.theme.OrangeYellow1
+    import com.example.medittionui.ui.theme.OrangeYellow2
+    import com.example.medittionui.ui.theme.OrangeYellow3
     import com.example.medittionui.ui.theme.TextWhite
     import kotlin.io.path.Path
 
@@ -64,6 +79,36 @@
                 GreetingSection()
                 ChipSection(chips = listOf("Sweet sleep", "Insomnia", "Depression"))
                 CurrentMeditation()
+                FeatureSection(features = listOf(
+                    Feature(
+                        title = "Sleep meditation",
+                        R.drawable.ic_headphone,
+                        BlueViolet1,
+                        BlueViolet2,
+                        BlueViolet3
+                    ),
+                    Feature(
+                        title = "Tips for sleeping",
+                        R.drawable.ic_videocam,
+                        LightGreen1,
+                        LightGreen2,
+                        LightGreen3
+                    ),
+                    Feature(
+                        title = "Night island",
+                        R.drawable.ic_headphone,
+                        OrangeYellow1,
+                        OrangeYellow2,
+                        OrangeYellow3
+                    ),
+                    Feature(
+                        title = "Calming sounds",
+                        R.drawable.ic_headphone,
+                        Beige1,
+                        Beige2,
+                        Beige3
+                    )
+                ))
             }
         }
     }
@@ -194,13 +239,14 @@
                 modifier = Modifier.fillMaxHeight()
             ) {
                 items(features.size) {
-
+                    FeatureItem(features[it]) //it = 람다에 전달된 “현재 아이템의 인덱스(index)”
                 }
 
             }
         }
     }
 
+    //LazyVerticalGrid에 들어가는 각각의 아이템
     @Composable
     fun FeatureItem(
         feature: Feature
@@ -222,7 +268,7 @@
             val mediumColorPoint2 = Offset(width*0.1f, height*0.35f)
             val mediumColorPoint3 = Offset(width*0.4f, height*0.05f)
             val mediumColorPoint4 = Offset(width*0.75f, height*0.7f)
-            val mediumColorPoint5 = Offset(width*1.4f, -height.toFloat())
+            val mediumColorPoint5 = Offset(width*1.4f, -height.toFloat()) // width, height는 Int이므로 형변환
 
             val mediumColoredPath = Path().apply {
                 moveTo(mediumColorPoint1.x, mediumColorPoint1.y)
@@ -232,7 +278,73 @@
                 standardQuadFromTo(mediumColorPoint2, mediumColorPoint3)
                 standardQuadFromTo(mediumColorPoint3, mediumColorPoint4)
                 standardQuadFromTo(mediumColorPoint4, mediumColorPoint5)
+                //곡선 아래를 통째로 덮어서 “색칠 가능한 영역”을 만들기 위한 바닥선
+                lineTo(width.toFloat() + 100f, height.toFloat() + 100f)
+                lineTo(-100f, height.toFloat() + 100f)
+                close() //Path를 “완전히 닫힌 도형”으로 확정하기 위함, 현재 위치 → moveTo 했던 시작점 직선 연결
             }
 
+            // Light colored path
+            val lightPoint1 = Offset(0f, height * 0.35f)
+            val lightPoint2 = Offset(width * 0.1f, height * 0.4f)
+            val lightPoint3 = Offset(width * 0.3f, height * 0.35f)
+            val lightPoint4 = Offset(width * 0.65f, height.toFloat())
+            val lightPoint5 = Offset(width * 1.4f, -height.toFloat() / 3f)
+
+            val lightColoredPath = Path().apply {
+                moveTo(lightPoint1.x, lightPoint1.y)
+                standardQuadFromTo(lightPoint1, lightPoint2)
+                standardQuadFromTo(lightPoint2, lightPoint3)
+                standardQuadFromTo(lightPoint3, lightPoint4)
+                standardQuadFromTo(lightPoint4, lightPoint5)
+                lineTo(width.toFloat() + 100f, height.toFloat() + 100f)
+                lineTo(-100f, height.toFloat() + 100f)
+                close()
+            }
+            //Canvas → 선, 원, 곡선, Path를 직접 그림
+            Canvas(modifier = Modifier
+                .fillMaxSize()
+            ) {
+                drawPath(
+                    path = mediumColoredPath,
+                    color = feature.mediumColor
+                )
+                drawPath(
+                    path = lightColoredPath,
+                    color = feature.lightColor
+                )
+            }
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(15.dp)
+            )
+            {
+                Text(
+                    text = feature.title,
+                    style = MaterialTheme.typography.headlineMedium,
+                    lineHeight = 26.sp, //한 줄이 차지하는 세로 공간
+                    modifier = Modifier.align(Alignment.TopStart) //부모 레이아웃 안에서 이 Text를 왼쪽 위에 붙여라, Box계열 전용
+                )
+                Icon(
+                    painter = painterResource(id = feature.iconId),
+                    contentDescription = feature.title,
+                    tint = Color.White,
+                    modifier = Modifier.align(Alignment.BottomStart)
+                )
+                Text(
+                    text = "Start",
+                    color = TextWhite,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .clickable{
+                            //Handle the click
+                        }
+                        .align(Alignment.BottomEnd)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(ButtonBlue)
+                        .padding(vertical = 6.dp, horizontal = 15.dp)
+                )
+            }
         }
     }
