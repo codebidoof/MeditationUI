@@ -17,6 +17,7 @@
     import androidx.compose.foundation.layout.fillMaxWidth
     import androidx.compose.foundation.layout.padding
     import androidx.compose.foundation.layout.size
+    import androidx.compose.foundation.layout.systemBarsPadding
     import androidx.compose.foundation.lazy.LazyRow
     import androidx.compose.foundation.lazy.grid.GridCells
     import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -46,9 +47,11 @@
     import androidx.compose.ui.text.style.LineHeightStyle
     import androidx.compose.ui.unit.dp
     import androidx.compose.ui.unit.sp
+    import com.example.medittionui.BottomMenuContent
     import com.example.medittionui.Feature
     import com.example.medittionui.R
     import com.example.medittionui.standardQuadFromTo
+    import com.example.medittionui.ui.theme.AquaBlue
     import com.example.medittionui.ui.theme.Beige1
     import com.example.medittionui.ui.theme.Beige2
     import com.example.medittionui.ui.theme.Beige3
@@ -74,11 +77,13 @@
         Box(modifier = Modifier
             .background(DeepBlue)
             .fillMaxSize()
+            .systemBarsPadding() //상태바 + 네비게이션 바 영역만큼 자동으로 padding을 넣어줌
         ) {
             Column { //메인스크린
                 GreetingSection()
                 ChipSection(chips = listOf("Sweet sleep", "Insomnia", "Depression"))
                 CurrentMeditation()
+
                 FeatureSection(features = listOf(
                     Feature(
                         title = "Sleep meditation",
@@ -110,6 +115,14 @@
                     )
                 ))
             }
+
+            BottomMenu(items = listOf(
+                BottomMenuContent("Home", R.drawable.ic_home),
+                BottomMenuContent("Meditate", R.drawable.ic_bubble),
+                BottomMenuContent("Sleep", R.drawable.ic_moon),
+                BottomMenuContent("Music", R.drawable.ic_music),
+                BottomMenuContent("Profile", R.drawable.ic_profile),
+            ), modifier = Modifier.align(Alignment.BottomCenter)) //맨 아래에 배치
         }
     }
 
@@ -144,6 +157,83 @@
                 modifier = Modifier.size(24.dp)
             )
 
+        }
+    }
+
+    //바텀바
+    @Composable
+    fun BottomMenu(
+        items: List<BottomMenuContent>,
+        modifier: Modifier = Modifier,
+        activeHighlightColor: Color = ButtonBlue, //현재 선택(활성)된 바텀 메뉴 아이템을 강조할 색상
+        activeTextColor: Color = Color.White,
+        inactiveTextColor: Color = AquaBlue,
+        initialSelectedItemIndex: Int = 0 //바텀 메뉴가 처음 화면에 그려질 어느 아이템을 “선택된 상태”로 시작할지 정하는 값. 첫 아이템을 디폴트로 설정
+        ) {
+        var selectedItemIndex by remember {
+            mutableStateOf(initialSelectedItemIndex)
+        }
+        Row(
+            horizontalArrangement = Arrangement.SpaceAround, //자식 아이템들 사이를 동일하게 벌리고, 양 끝에도 여백을 반만 주는 배치 방식
+            modifier = modifier
+                .fillMaxWidth()
+                .background(DeepBlue)
+                .padding(15.dp)
+        ) {
+            //리스트(items)의 요소를 하나씩 순회하면서, 해당 요소와 인덱스를 동시에 가져오는 반복문
+            //바텀 메뉴 아이템을 화면에 하나씩 그리면서
+            //“어떤 게 선택됐는지”를 판단하고
+            //“클릭하면 선택 상태를 바꾸는 역할”
+            items.forEachIndexed { index, item ->
+                BottomMenuItem(
+                    item = item,
+                    isSelected = index == selectedItemIndex, //비교식(==)의 결과(Boolean)를 그대로 파라미터에 넘기는 문법
+                    activeHighlightColor = activeHighlightColor,
+                    activeTextColor = activeTextColor,
+                    inactiveTextColor = inactiveTextColor
+                ) {
+                    //클릭 이벤트
+                    selectedItemIndex = index
+                }
+            }
+        }
+    }
+
+    //바텀바의 각 item들
+    @Composable
+    fun BottomMenuItem(
+        item: BottomMenuContent,
+        isSelected: Boolean = false,
+        activeHighlightColor: Color = ButtonBlue, //현재 선택(활성)된 바텀 메뉴 아이템을 강조할 색상
+        activeTextColor: Color = Color.White,
+        inactiveTextColor: Color = AquaBlue,
+        onItemClick: () -> Unit //클릭 이벤트. 나중에 이 자리에 실행문 작성하면됨
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally, //가로 방향으로 가운데 정렬
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.clickable{
+                onItemClick()
+            }
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if(isSelected) activeHighlightColor else Color.Transparent)
+                    .padding(10.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = item.iconId),
+                    contentDescription = item.title,
+                    tint = if (isSelected) activeTextColor else inactiveTextColor,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Text(
+                text = item.title,
+                color = if (isSelected) activeTextColor else inactiveTextColor
+            )
         }
     }
 
